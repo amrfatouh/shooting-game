@@ -8,31 +8,48 @@ var height = ORIGINAL_HEIGHT;
 
 var zombie = document.getElementById('zombie');
 zombie.onclick = shootZombie;
+var livesText = document.getElementById('lives');
+var timeText = document.getElementById('time');
+var bestScoreText = document.getElementById('best-score');
+var resultText = document.getElementById('result');
+var resetBtn = document.getElementById('reset');
+resetBtn.onclick = resetGame;
 
 var seconds = GAME_TIME;
 var zombieAttackTime = ZOMBIE_ATTACK_TIME;
 var score = 0;
 var lives = LIVES;
+var bestScore;
 var scoreText = document.getElementById('score');
+
+window.onload = function () {
+    this.typeTime();
+}
 
 var countDown = setInterval(secondPass, 1000);
 
 function secondPass() {
-    var timeText = document.getElementById('time');
-
     seconds--;
-    var secondsText = 'time: ' + Math.floor(seconds / 60) + ':' + seconds % 60;
-    timeText.innerHTML = secondsText;
+    typeTime();
     if (seconds === 0) {
         victory();
     }
+}
 
+function typeTime() {
+    var secondsText;
+    //putting a 0 after colon when seconds < 10
+    if (seconds >= 10) {
+        secondsText = 'time: ' + Math.floor(seconds / 60) + ':' + seconds % 60;
+    } else {
+        secondsText = 'time: ' + Math.floor(seconds / 60) + ':0' + seconds % 60;
+    }
+    timeText.innerHTML = secondsText;
 }
 
 var zombieAttackInterval = setInterval(zombieSecondPass, 1000);
 
 function zombieSecondPass() {
-    var livesText = document.getElementById('lives');
     if (zombieAttackTime > 0) {
         zombieAttackTime--;
     } else {
@@ -66,12 +83,16 @@ function resetZombieSize() {
     zombie.style.height = ORIGINAL_HEIGHT;
 }
 
-function shootZombie() {
-    playBulletSound();
+function randomizeLocation() {
     var randX = Math.ceil(Math.random() * 75) + 20,
         randY = Math.ceil(Math.random() * 75) + 10; //the +10 for the score
     zombie.style.right = randX + '%';
     zombie.style.top = randY + '%';
+}
+
+function shootZombie() {
+    playBulletSound();
+    randomizeLocation();
 
     score++;
     scoreText.innerHTML = 'score: ' + score;
@@ -81,18 +102,42 @@ function shootZombie() {
     resetZombieSize();
 }
 
+function resetGame() {
+    zombie.onclick = shootZombie;
+    randomizeLocation();
+    //resetting counters
+    seconds = GAME_TIME;
+    lives = LIVES;
+    score = 0;
+    width = ORIGINAL_WIDTH;
+    height = ORIGINAL_HEIGHT;
+    //resetting labels
+    scoreText.innerHTML = 'score: ' + score;
+    livesText.innerHTML = 'lives: ' + lives;
+    var secondsText = 'time: ' + Math.floor(seconds / 60) + ':' + seconds % 60;
+    timeText.innerHTML = secondsText;
+    resultText.innerHTML = "";
+    resetBtn.style.visibility = 'hidden';
+    //resetting intervals
+    countDown = setInterval(secondPass, 1000);
+    zombieAttackInterval = setInterval(zombieSecondPass, 1000);
+    zombieApproachingInterval = setInterval(zombieZoom, 100);
+}
+
 // game finish
 function gameEnd() {
     zombie.onclick = "";
+    resetBtn.style.visibility = 'visible';
+    if (bestScore == null || score > bestScore) {
+        bestScore = score;
+        bestScoreText.innerHTML = 'best score: ' + bestScore;
+    }
     clearInterval(countDown); //stopping the count-down
     clearInterval(zombieAttackInterval); //stopping zombieAttackInterval
 }
 function victory() {
     gameEnd();
     victorySound();
-    var resultText = document.getElementById('result');
-    var bestScoreText = document.getElementById('best-score');
-    bestScoreText.innerHTML = 'best score: ' + score; //recording best score
     resultText.innerHTML = 'survived!'
 
 
@@ -100,8 +145,6 @@ function victory() {
 function failure() {
     gameEnd();
     failureSound();
-    var resultText = document.getElementById('result');
-    var bestScoreText = document.getElementById('best-score');
     resultText.innerHTML = 'you\'re eaten alive!'
 }
 

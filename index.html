@@ -17,6 +17,20 @@
             position: absolute;
             top: 50%;
             right: 50%;
+            cursor: crosshair;
+        }
+        #reset {
+            border-style: solid;
+            border-width: 2px;
+            border-color: black;
+            color: black;
+            margin: 3px 0;
+            padding: 1px 10px;
+            display: inline-block;
+            visibility: hidden;
+        }
+        #reset:hover {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -27,6 +41,8 @@
     <div id='time'>time: </div>
     <div id="best-score">best score: </div>
     <div id="result"></div>
+    <div><div id="reset">reset</div></div>
+    <br>
     <img src='zombie.png'class='zombie' id='zombie'></img>
     
     <audio id='bullet-audio-1'>
@@ -56,6 +72,7 @@
         <source src='failure.mp3' type='audio/mpeg'>
     </audio>
     
+    <script src="https://use.fontawesome.com/5d3232f96d.js"></script>
     <script src='test.js'></script>
 </body>
 </html>
