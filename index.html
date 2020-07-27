@@ -4,12 +4,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        .btn {
+        body {
+            position: relative;
+        }
+        .zombie {
             width: 50px;
-            height: 50px;
+            height: 100px;
             background-color: red;
             border-radius: 7px;
             border: none;
+            background-image: url('zombie.png');
+            position: absolute;
+            top: 50%;
+            right: 50%;
         }
     </style>
 </head>
@@ -20,7 +27,7 @@
     <div id='time'>time: </div>
     <div id="best-score">best score: </div>
     <div id="result"></div>
-    <button class='btn' id='btn'></button>
+    <img src='zombie.png'class='zombie' id='zombie'></img>
     
     <audio id='bullet-audio-1'>
         <source src='bullet1.mp3' type='audio/mpeg'>

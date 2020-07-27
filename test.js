@@ -1,13 +1,21 @@
-var btn = document.getElementById('btn');
-var seconds = 20;
-var zombieAttackTime = 3;
+const GAME_TIME = 20;
+const ZOMBIE_ATTACK_TIME = 3;
+const LIVES = 3;
+const ORIGINAL_WIDTH = 50;
+const ORIGINAL_HEIGHT = 100;
+var width = ORIGINAL_WIDTH;
+var height = ORIGINAL_HEIGHT;
+
+var zombie = document.getElementById('zombie');
+zombie.onclick = shootZombie;
+
+var seconds = GAME_TIME;
+var zombieAttackTime = ZOMBIE_ATTACK_TIME;
 var score = 0;
-var lives = 3;
+var lives = LIVES;
 var scoreText = document.getElementById('score');
 
-var countDown = setInterval(function () {
-    secondPass();
-}, 1000);
+var countDown = setInterval(secondPass, 1000);
 
 function secondPass() {
     var timeText = document.getElementById('time');
@@ -21,12 +29,64 @@ function secondPass() {
 
 }
 
+var zombieAttackInterval = setInterval(zombieSecondPass, 1000);
+
+function zombieSecondPass() {
+    var livesText = document.getElementById('lives');
+    if (zombieAttackTime > 0) {
+        zombieAttackTime--;
+    } else {
+        lives--;
+        livesText.innerHTML = 'lives: ' + lives;
+        playZombieSound();
+        resetZombieSize();
+
+        if (lives === 0) {
+            failure();
+        }
+        zombieAttackTime = ZOMBIE_ATTACK_TIME; //reset zombieAttackTime
+    }
+}
+
+var zombieApproachingInterval = setInterval(zombieZoom, 100);
+
+function zombieZoom() {
+    width += 0.75;
+    zombie.style.width = width;
+    height += 1.5;
+    zombie.style.height = height;
+    if (lives === 0 || seconds === 0) {
+        clearInterval(zombieApproachingInterval);
+    }
+}
+function resetZombieSize() {
+    width = ORIGINAL_WIDTH;
+    height = ORIGINAL_HEIGHT;
+    zombie.style.width = ORIGINAL_WIDTH;
+    zombie.style.height = ORIGINAL_HEIGHT;
+}
+
+function shootZombie() {
+    playBulletSound();
+    var randX = Math.ceil(Math.random() * 75) + 20,
+        randY = Math.ceil(Math.random() * 75) + 10; //the +10 for the score
+    zombie.style.right = randX + '%';
+    zombie.style.top = randY + '%';
+
+    score++;
+    scoreText.innerHTML = 'score: ' + score;
+
+    zombieAttackTime = ZOMBIE_ATTACK_TIME; //reseting zombie attack time
+
+    resetZombieSize();
+}
+
+// game finish
 function gameEnd() {
-    btn.disabled = true;
+    zombie.onclick = "";
     clearInterval(countDown); //stopping the count-down
     clearInterval(zombieAttackInterval); //stopping zombieAttackInterval
 }
-
 function victory() {
     gameEnd();
     victorySound();
@@ -37,7 +97,6 @@ function victory() {
 
 
 }
-
 function failure() {
     gameEnd();
     failureSound();
@@ -46,25 +105,7 @@ function failure() {
     resultText.innerHTML = 'you\'re eaten alive!'
 }
 
-var zombieAttackInterval = setInterval(function () {
-    zombieSecondPass();
-}, 1000);
-
-function zombieSecondPass() {
-    var livesText = document.getElementById('lives');
-    if (zombieAttackTime > 0) {
-        zombieAttackTime--;
-    } else {
-        lives--;
-        livesText.innerHTML = 'lives: ' + lives;
-        playZombieSound();
-        if (lives === 0) {
-            failure();
-        }
-        zombieAttackTime = 3; //reset zombieAttackTime
-    }
-}
-
+// sounds
 function playBulletSound() {
     var bulletAudio1 = document.getElementById('bullet-audio-1');
     var bulletAudio2 = document.getElementById('bullet-audio-2');
@@ -86,7 +127,6 @@ function playBulletSound() {
             break;
     }
 }
-
 function playZombieSound() {
     var giantLaugh1 = document.getElementById('giant-laugh-1');
     var giantLaugh2 = document.getElementById('giant-laugh-2');
@@ -108,27 +148,13 @@ function playZombieSound() {
             break;
     }
 }
-
 function victorySound() {
     var victory = document.getElementById('success');
     victory.load();
     victory.play();
 }
-
 function failureSound() {
     var failure = document.getElementById('failure');
     failure.load();
     failure.play();
-}
-
-btn.onclick = function () {
-    playBulletSound();
-    var randX = Math.ceil(Math.random() * 1200),
-        randY = Math.ceil(Math.random() * 500) + 20; //the +20 for the score
-    btn.style.transform = 'translate(' + randX + 'px, ' + randY + 'px)';
-
-    score++;
-    scoreText.innerHTML = 'score: ' + score;
-
-    zombieAttackTime = 3; //reseting zombie attack time
 }
