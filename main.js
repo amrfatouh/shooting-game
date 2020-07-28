@@ -32,6 +32,7 @@ var scoreText = document.getElementById('score');
 
 window.onload = function () {
     this.typeTime();
+    document.getElementById('for-netlify').style.display = 'none';
 }
 
 var countDown = setInterval(secondPass, 1000);
