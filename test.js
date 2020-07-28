@@ -1,8 +1,13 @@
-const GAME_TIME = 20;
-const ZOMBIE_ATTACK_TIME = 3;
+const GAME_TIME = 10;
+const ZOMBIE_ATTACK_TIME_LVL1 = 3;
+const ZOMBIE_ATTACK_TIME_LVL2 = 2;
+const ZOMBIE_ATTACK_TIME_LVL3 = 1.5;
 const LIVES = 3;
 const ORIGINAL_WIDTH = 50;
 const ORIGINAL_HEIGHT = 100;
+const LAST_LEVEL = 3;
+
+
 var width = ORIGINAL_WIDTH;
 var height = ORIGINAL_HEIGHT;
 
@@ -12,11 +17,14 @@ var livesText = document.getElementById('lives');
 var timeText = document.getElementById('time');
 var bestScoreText = document.getElementById('best-score');
 var resultText = document.getElementById('result');
+var nextLevelBtn = document.getElementById('next-level');
 var resetBtn = document.getElementById('reset');
 resetBtn.onclick = resetGame;
+nextLevelBtn.onclick = nextLevel;
 
 var seconds = GAME_TIME;
-var zombieAttackTime = ZOMBIE_ATTACK_TIME;
+var zombieAttackTime = ZOMBIE_ATTACK_TIME_LVL1;
+var level = 1;
 var score = 0;
 var lives = LIVES;
 var bestScore;
@@ -27,7 +35,6 @@ window.onload = function () {
 }
 
 var countDown = setInterval(secondPass, 1000);
-
 function secondPass() {
     seconds--;
     typeTime();
@@ -35,7 +42,6 @@ function secondPass() {
         victory();
     }
 }
-
 function typeTime() {
     var secondsText;
     //putting a 0 after colon when seconds < 10
@@ -47,52 +53,62 @@ function typeTime() {
     timeText.innerHTML = secondsText;
 }
 
-var zombieAttackInterval = setInterval(zombieSecondPass, 1000);
-
+var zombieAttackInterval = setInterval(zombieSecondPass, 500);
 function zombieSecondPass() {
-    if (zombieAttackTime > 0) {
-        zombieAttackTime--;
-    } else {
-        lives--;
-        livesText.innerHTML = 'lives: ' + lives;
-        playZombieSound();
-        resetZombieSize();
-
-        if (lives === 0) {
-            failure();
-        }
-        zombieAttackTime = ZOMBIE_ATTACK_TIME; //reset zombieAttackTime
+    zombieAttackTime -= 0.5;
+    if (zombieAttackTime <= 0) {
+        zombieAttack();
     }
 }
+function zombieAttack() {
+    lives--;
+    livesText.innerHTML = 'lives: ' + lives;
+    playZombieSound();
+    resetZombieSize();
 
-var zombieApproachingInterval = setInterval(zombieZoom, 100);
-
-function zombieZoom() {
-    width += 0.75;
-    zombie.style.width = width;
-    height += 1.5;
-    zombie.style.height = height;
-    if (lives === 0 || seconds === 0) {
-        
+    if (lives === 0) {
+        failure();
     }
+    setZombieAttackTime() //reset zombieAttackTime
 }
-
-var zombieWalkingAnimation = setInterval(zombieWalking, 100);
-
-var imageNumber = 1;
-function zombieWalking () {
-    imageNumber++;
-    if (imageNumber > 10) {
-        imageNumber = 1;
-    }
-    zombie.src = './assets/images/zombie-walking/zombie-walking-' + imageNumber + '.png';
-}
-
 function resetZombieSize() {
     width = ORIGINAL_WIDTH;
     height = ORIGINAL_HEIGHT;
     zombie.style.width = ORIGINAL_WIDTH;
     zombie.style.height = ORIGINAL_HEIGHT;
+}
+
+var zombieApproachingInterval = setInterval(zombieZoom, 50);
+function zombieZoom() {
+    switch (level) {
+        case 1:
+            width += 0.3;
+            zombie.style.width = width;
+            height += 0.4;
+            zombie.style.height = height;
+            break;
+        case 2:
+            width += 0.6;
+            zombie.style.width = width;
+            height += 0.8;
+            zombie.style.height = height;
+            break;
+        case 3:
+            width += 0.9;
+            zombie.style.width = width;
+            height += 1.2;
+            zombie.style.height = height;
+    }
+}
+
+var zombieWalkingAnimation = setInterval(zombieWalking, 100);
+var imageNumber = 1;
+function zombieWalking() {
+    imageNumber++;
+    if (imageNumber > 10) {
+        imageNumber = 1;
+    }
+    zombie.src = './assets/images/zombie-walking/zombie-walking-' + imageNumber + '.png';
 }
 
 function randomizeLocation() {
@@ -109,7 +125,7 @@ function shootZombie() {
     score++;
     scoreText.innerHTML = 'score: ' + score;
 
-    zombieAttackTime = ZOMBIE_ATTACK_TIME; //reseting zombie attack time
+    setZombieAttackTime();
 
     resetZombieSize();
 }
@@ -119,10 +135,12 @@ function resetGame() {
     randomizeLocation();
     //resetting counters
     seconds = GAME_TIME;
+    level = 1;
     lives = LIVES;
     score = 0;
     width = ORIGINAL_WIDTH;
     height = ORIGINAL_HEIGHT;
+    setZombieAttackTime();
     //resetting labels
     scoreText.innerHTML = 'score: ' + score;
     livesText.innerHTML = 'lives: ' + lives;
@@ -132,9 +150,66 @@ function resetGame() {
     resetBtn.style.visibility = 'hidden';
     //resetting intervals
     countDown = setInterval(secondPass, 1000);
-    zombieAttackInterval = setInterval(zombieSecondPass, 1000);
-    zombieApproachingInterval = setInterval(zombieZoom, 100);
+    zombieAttackInterval = setInterval(zombieSecondPass, 500);
+    zombieApproachingInterval = setInterval(zombieZoom, 50);
     zombieWalkingAnimation = setInterval(zombieWalking, 100);
+}
+
+function nextLevel() {
+    level++;
+    nextLevelBtn.style.visibility = 'hidden';
+    //resetting zombie
+    zombie.onclick = shootZombie;
+    randomizeLocation();
+    //resetting counters
+    seconds = GAME_TIME;
+    lives = LIVES;
+    width = ORIGINAL_WIDTH;
+    height = ORIGINAL_HEIGHT;
+    //resetting labels
+    livesText.innerHTML = 'lives: ' + lives;
+    var secondsText = 'time: ' + Math.floor(seconds / 60) + ':' + seconds % 60;
+    timeText.innerHTML = secondsText;
+    //continuing the intervals
+    countDown = setInterval(secondPass, 1000);
+    zombieAttackInterval = setInterval(zombieSecondPass, 500);
+    zombieApproachingInterval = setInterval(zombieZoom, 50);
+    //adjusting walking speed for the zombie for different levels
+    switch (level) {
+        case 1:
+            zombieWalkingAnimation = setInterval(zombieWalking, 100);
+            break;
+        case 2:
+            zombieWalkingAnimation = setInterval(zombieWalking, 75);
+            break;
+        case 3:
+            zombieWalkingAnimation = setInterval(zombieWalking, 50);
+            break;
+    }
+    //setting level-dependent variables
+    setZombieAttackTime();
+}
+function setZombieAttackTime() {
+    switch (level) {
+        case 1:
+            zombieAttackTime = ZOMBIE_ATTACK_TIME_LVL1
+            break;
+        case 2:
+            zombieAttackTime = ZOMBIE_ATTACK_TIME_LVL2
+            break;
+        case 3:
+            zombieAttackTime = ZOMBIE_ATTACK_TIME_LVL3
+            break;
+    }
+}
+
+function levelEnd() {
+    zombie.onclick = "";
+    nextLevelBtn.style.visibility = 'visible';
+    clearInterval(countDown); //stopping the count-down
+    clearInterval(zombieAttackInterval); //stopping zombieAttackInterval
+    clearInterval(zombieApproachingInterval); //stopping Approaching Interval
+    clearInterval(zombieWalkingAnimation); //stopping zombieWalking Animation
 }
 
 // game finish
@@ -151,9 +226,13 @@ function gameEnd() {
     clearInterval(zombieWalkingAnimation); //stopping zombieWalking Animation
 }
 function victory() {
-    gameEnd();
+    if (level != LAST_LEVEL) {
+        levelEnd();
+    } else {
+        resultText.innerHTML = 'survived!';
+        gameEnd();
+    }
     victorySound();
-    resultText.innerHTML = 'survived!'
 
 
 }
