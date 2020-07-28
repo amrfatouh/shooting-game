@@ -108,7 +108,7 @@ function zombieWalking() {
     if (imageNumber > 10) {
         imageNumber = 1;
     }
-    zombie.src = './assets/images/zombie-walking/zombie-walking-' + imageNumber + '.png';
+    zombie.src = 'zombie-walking-' + imageNumber + '.png';
 }
 
 function randomizeLocation() {
