@@ -73,9 +73,21 @@ function zombieZoom() {
     height += 1.5;
     zombie.style.height = height;
     if (lives === 0 || seconds === 0) {
-        clearInterval(zombieApproachingInterval);
+        
     }
 }
+
+var zombieWalkingAnimation = setInterval(zombieWalking, 100);
+
+var imageNumber = 1;
+function zombieWalking () {
+    imageNumber++;
+    if (imageNumber > 10) {
+        imageNumber = 1;
+    }
+    zombie.src = './assets/images/zombie-walking/zombie-walking-' + imageNumber + '.png';
+}
+
 function resetZombieSize() {
     width = ORIGINAL_WIDTH;
     height = ORIGINAL_HEIGHT;
@@ -122,6 +134,7 @@ function resetGame() {
     countDown = setInterval(secondPass, 1000);
     zombieAttackInterval = setInterval(zombieSecondPass, 1000);
     zombieApproachingInterval = setInterval(zombieZoom, 100);
+    zombieWalkingAnimation = setInterval(zombieWalking, 100);
 }
 
 // game finish
@@ -134,6 +147,8 @@ function gameEnd() {
     }
     clearInterval(countDown); //stopping the count-down
     clearInterval(zombieAttackInterval); //stopping zombieAttackInterval
+    clearInterval(zombieApproachingInterval); //stopping Approaching Interval
+    clearInterval(zombieWalkingAnimation); //stopping zombieWalking Animation
 }
 function victory() {
     gameEnd();
